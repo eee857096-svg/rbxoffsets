@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RBXOFFSETS — version-d599f7fc52a8404c</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c10;
+    --surface: #0d1117;
+    --border: #1a2030;
+    --border-bright: #253045;
+    --accent: #00d4ff;
+    --accent2: #ff4b6e;
+    --accent3: #a8ff78;
+    --text: #c8d6e8;
+    --text-dim: #4a5d75;
+    --text-bright: #eaf2ff;
+    --glow: rgba(0,212,255,0.15);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  /* Scanline overlay */
+  body::before {
+    content:'';
+    position:fixed;
+    inset:0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  header {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, #0a1018 0%, transparent 100%);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+    text-shadow: 0 0 20px var(--glow);
+  }
+  .logo span { color: var(--accent2); }
+  .version-tag {
+    font-size: 10px;
+    color: var(--text-dim);
+    border: 1px solid var(--border-bright);
+    padding: 4px 10px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+  }
+  .stats {
+    display: flex;
+    gap: 24px;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .stats span { color: var(--accent3); font-weight: 500; }
+
+  .search-bar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .search-input {
+    background: var(--surface);
+    border: 1px solid var(--border-bright);
+    color: var(--text-bright);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 9px 14px 9px 38px;
+    border-radius: 4px;
+    width: 340px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    position: relative;
+  }
+  .search-wrap { position: relative; }
+  .search-wrap::before {
+    content: '⌕';
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim);
+    font-size: 16px;
+    pointer-events: none;
+    z-index:1;
+  }
+  .search-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,212,255,0.08);
+  }
+  .search-input::placeholder { color: var(--text-dim); }
+
+  .filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.3px;
+  }
+  .filter-btn:hover { border-color: var(--border-bright); color: var(--text); }
+  .filter-btn.active {
+    background: rgba(0,212,255,0.1);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .layout {
+    display: flex;
+    height: calc(100vh - 160px);
+  }
+
+  /* Namespace sidebar */
+  .sidebar {
+    width: 220px;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 12px 0;
+    flex-shrink: 0;
+  }
+  .sidebar::-webkit-scrollbar { width: 3px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
+  .ns-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 16px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text-dim);
+    transition: all 0.12s;
+    gap: 8px;
+  }
+  .ns-item:hover { background: rgba(255,255,255,0.03); color: var(--text); }
+  .ns-item.active { background: rgba(0,212,255,0.06); color: var(--accent); border-right: 2px solid var(--accent); }
+  .ns-name { font-weight: 500; }
+  .ns-count {
+    font-size: 10px;
+    color: var(--text-dim);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 10px;
+  }
+  .ns-item.active .ns-count { border-color: var(--border-bright); color: var(--accent); }
+
+  /* Main content */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+  }
+  .main::-webkit-scrollbar { width: 4px; }
+  .main::-webkit-scrollbar-track { background: transparent; }
+  .main::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
+
+  .ns-section {
+    border-bottom: 1px solid var(--border);
+  }
+  .ns-header {
+    padding: 14px 24px 12px;
+    background: linear-gradient(90deg, rgba(0,212,255,0.04) 0%, transparent 60%);
+    border-left: 3px solid var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: blur(8px);
+    background-color: rgba(8,12,16,0.92);
+  }
+  .ns-header-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 0.3px;
+  }
+  .ns-header-count {
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  .offsets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0;
+  }
+  .offset-row {
+    display: flex;
+    align-items: center;
+    padding: 10px 24px;
+    border-bottom: 1px solid rgba(26,32,48,0.5);
+    transition: background 0.1s;
+    gap: 12px;
+    cursor: pointer;
+    position: relative;
+  }
+  .offset-row:hover { background: rgba(255,255,255,0.025); }
+  .offset-row:hover .copy-hint { opacity: 1; }
+  .offset-name {
+    flex: 1;
+    font-size: 12.5px;
+    color: var(--text);
+    font-weight: 400;
+  }
+  .offset-value {
+    font-size: 12.5px;
+    color: var(--accent3);
+    font-weight: 500;
+    min-width: 80px;
+    text-align: right;
+  }
+  .copy-hint {
+    font-size: 9px;
+    color: var(--text-dim);
+    opacity: 0;
+    transition: opacity 0.15s;
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .offset-row.copied { background: rgba(168,255,120,0.06); }
+  .offset-row.copied .offset-value { color: var(--accent3); }
+
+  /* Pointer offsets get special treatment */
+  .offset-row.is-pointer .offset-value { color: var(--accent2); }
+  .offset-row.is-pointer::before {
+    content: '▶';
+    font-size: 7px;
+    color: var(--accent2);
+    opacity: 0.6;
+  }
+
+  /* Empty state */
+  .empty {
+    padding: 60px 24px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: rgba(13,17,23,0.95);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 10px 18px;
+    border-radius: 4px;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none;
+    box-shadow: 0 0 20px rgba(0,212,255,0.2);
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  .result-count {
+    font-size: 11px;
+    color: var(--text-dim);
+    padding: 8px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .result-count span { color: var(--accent); }
+
+  @media (max-width: 700px) {
+    .sidebar { width: 160px; }
+    .search-input { width: 200px; }
+    .offsets-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div>
+      <div class="logo">RBX<span>.</span>OFFSETS</div>
+      <div class="version-tag">version-d599f7fc52a8404c · 300 offsets · dumped 04/03/2026</div>
+    </div>
+    <div class="stats">
+      <div>namespaces <span id="ns-count">—</span></div>
+      <div>visible <span id="visible-count">—</span></div>
+    </div>
+  </div>
+  <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+    <div class="search-wrap">
+      <input class="search-input" id="search" type="text" placeholder="search offset or namespace..." autocomplete="off" spellcheck="false">
+    </div>
+    <div class="filters" id="filters">
+      <button class="filter-btn active" data-filter="all">ALL</button>
+      <button class="filter-btn" data-filter="player">Player</button>
+      <button class="filter-btn" data-filter="humanoid">Humanoid</button>
+      <button class="filter-btn" data-filter="rendering">Rendering</button>
+      <button class="filter-btn" data-filter="gui">GUI</button>
+      <button class="filter-btn" data-filter="pointers">Pointers</button>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <div class="sidebar" id="sidebar"></div>
+  <div class="main" id="main">
+    <div class="result-count" id="result-count"></div>
+    <div id="content"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const RAW = {
+  AirProperties: { AirDensity: 0x18, GlobalWind: 0x3c },
+  AnimationTrack: { Animation: 0xd0, Animator: 0x118, IsPlaying: 0x4b8, Looped: 0xf5, Speed: 0xe4 },
+  Animator: { ActiveAnimations: 0x620 },
+  Atmosphere: { Color: 0xd0, Decay: 0xdc, Density: 0xe8, Glare: 0xec, Haze: 0xf0, Offset: 0xf4 },
+  Attachment: { Position: 0xdc },
+  BasePart: { Color3: 0x194, Primitive: 0x148, Shape: 0x1b1, Transparency: 0xf0 },
+  BloomEffect: { Enabled: 0xc8, Intensity: 0xd0, Size: 0xd4, Threshold: 0xd8 },
+  BlurEffect: { Enabled: 0xc8, Size: 0xd0 },
+  ByteCode: { Pointer: 0x10, Size: 0x20 },
+  Camera: { CameraSubject: 0xe8, CameraType: 0x158, FieldOfView: 0x160, Position: 0x11c, Rotation: 0xf8, Viewport: 0x2ac, ViewportSize: 0x2e8 },
+  CharacterMesh: { BaseTextureId: 0xe0, BodyPart: 0x160, MeshId: 0x110, OverlayTextureId: 0x140 },
+  ClickDetector: { MaxActivationDistance: 0x100, MouseIcon: 0xe0 },
+  Clothing: { Color3: 0x128, Template: 0x108 },
+  ColorCorrectionEffect: { Brightness: 0xdc, Contrast: 0xe0, Enabled: 0xc8, TintColor: 0xd0 },
+  ColorGradingEffect: { Enabled: 0xc8, TonemapperPreset: 0xd0 },
+  DataModel: { CreatorId: 0x188, GameId: 0x190, GameLoaded: 0x600, JobId: 0x138, PlaceId: 0x198, PlaceVersion: 0x1b4, PrimitiveCount: 0x440, ScriptContext: 0x3f0, ServerIP: 0x5e8, Workspace: 0x178 },
+  DepthOfFieldEffect: { Enabled: 0xc8, FarIntensity: 0xd0, FocusDistance: 0xd4, InFocusRadius: 0xd8, NearIntensity: 0xdc },
+  FakeDataModel: { Pointer: 0x7f6c228, RealDataModel: 0x1c0 },
+  GuiBase2D: { AbsolutePosition: 0x110, AbsoluteRotation: 0x188, AbsoluteSize: 0x118 },
+  GuiObject: { BackgroundColor3: 0x538, BackgroundTransparency: 0x544, BorderColor3: 0x544, Image: 0x9c8, LayoutOrder: 0x578, Position: 0x508, RichText: 0xa98, Rotation: 0x188, ScreenGui_Enabled: 0x4bc, Size: 0x528, Text: 0xdf8, TextColor3: 0xea8, Visible: 0x5a5, ZIndex: 0x59c },
+  Humanoid: { AutoJumpEnabled: 0x1d8, AutoRotate: 0x1d9, BreakJointsOnDeath: 0x1db, CameraOffset: 0x140, DisplayDistanceType: 0x18c, DisplayName: 0xd0, EvaluateStateMachine: 0x1dc, FloorMaterial: 0x190, Health: 0x194, HealthDisplayDistance: 0x198, HealthDisplayType: 0x19c, HipHeight: 0x1a0, HumanoidRootPart: 0x4b8, HumanoidState: 0x8d0, HumanoidStateID: 0x20, IsWalking: 0x94e, Jump: 0x1dd, JumpHeight: 0x1ac, JumpPower: 0x1b0, MaxHealth: 0x1b4, MaxSlopeAngle: 0x1b8, MoveDirection: 0x158, MoveToPart: 0x130, MoveToPoint: 0x17c, NameDisplayDistance: 0x1bc, NameOcclusion: 0x1c0, PlatformStand: 0x1df, RequiresNeck: 0x1e0, RigType: 0x1c8, SeatPart: 0x120, Sit: 0x1e0, TargetPoint: 0x164, Walkspeed: 0x1d4, WalkspeedCheck: 0x3b8 },
+  Instance: { AttributeContainer: 0x48, AttributeList: 0x18, AttributeToNext: 0x58, AttributeToValue: 0x18, ChildrenEnd: 0x8, ChildrenStart: 0x70, ClassBase: 0xde8, ClassDescriptor: 0x18, ClassName: 0x8, Name: 0xb0, Parent: 0x68, This: 0x8 },
+  Lighting: { Ambient: 0xd8, Brightness: 0x120, ClockTime: 0x1b8, ColorShift_Bottom: 0xf0, ColorShift_Top: 0xe4, EnvironmentDiffuseScale: 0x124, EnvironmentSpecularScale: 0x128, ExposureCompensation: 0x12c, FogColor: 0xfc, FogEnd: 0x134, FogStart: 0x138, GeographicLatitude: 0x190, GlobalShadows: 0x148, GradientBottom: 0x194, GradientTop: 0x150, LightColor: 0x15c, LightDirection: 0x168, MoonPosition: 0x184, OutdoorAmbient: 0x108, Sky: 0x1d8, Source: 0x174, SunPosition: 0x178 },
+  LocalScript: { ByteCode: 0x1a8, GUID: 0xe8, Hash: 0x1b8 },
+  MaterialColors: { Asphalt: 0x30, Basalt: 0x27, Brick: 0xf, Cobblestone: 0x33, Concrete: 0xc, CrackedLava: 0x2d, Glacier: 0x1b, Grass: 0x6, Ground: 0x2a, Ice: 0x36, LeafyGrass: 0x39, Limestone: 0x3f, Mud: 0x24, Pavement: 0x42, Rock: 0x18, Salt: 0x3c, Sand: 0x12, Sandstone: 0x21, Slate: 0x9, Snow: 0x1e, WoodPlanks: 0x15 },
+  MeshPart: { MeshId: 0x2e8, Texture: 0x318 },
+  Misc: { Adornee: 0x108, AnimationId: 0xd0, StringLength: 0x10, Value: 0xd0 },
+  Model: { PrimaryPart: 0x278, Scale: 0x164 },
+  ModuleScript: { ByteCode: 0x150, GUID: 0xe8, Hash: 0x160 },
+  MouseService: { InputObject: 0x100, MousePosition: 0xec, SensitivityPointer: 0x7fea7d0 },
+  Player: { CameraMode: 0x318, Country: 0x110, DisplayName: 0x130, Gender: 0x0, HealthDisplayDistance: 0x338, LocalPlayer: 0x130, MaxZoomDistance: 0x310, MinZoomDistance: 0x314, ModelInstance: 0x380, Mouse: 0xda8, NameDisplayDistance: 0x344, Team: 0x290, UserId: 0x2b8 },
+  PlayerConfigurer: { Pointer: 0x7f49720 },
+  PlayerMouse: { Icon: 0x0, Workspace: 0x118 },
+  Primitive: { AssemblyAngularVelocity: 0xfc, AssemblyLinearVelocity: 0xf0, Flags: 0x1ae, Material: 0x248, Owner: 0x210, Position: 0xe4, Rotation: 0xc0, Size: 0x1b0, Validate: 0x6 },
+  PrimitiveFlags: { Anchored: 0x2, CanCollide: 0x8, CanTouch: 0x10 },
+  ProximityPrompt: { ActionText: 0xd0, Enabled: 0x156, GamepadKeyCode: 0x13c, HoldDuration: 0x140, KeyCode: 0x144, MaxActivationDistance: 0x148, ObjectText: 0xf0, RequiresLineOfSight: 0x157 },
+  RenderJob: { FakeDataModel: 0x38, RealDataModel: 0x1b0, RenderView: 0x218 },
+  RenderView: { DeviceD3D11: 0x8, LightingValid: 0x148, SkyValid: 0x2cd, VisualEngine: 0x10 },
+  RunService: { HeartbeatFPS: 0xb8, HeartbeatTask: 0xe8 },
+  Seat: { Occupant: 0x220 },
+  Sky: { MoonAngularSize: 0x25c, MoonTextureId: 0xe0, SkyboxBk: 0x110, SkyboxDn: 0x140, SkyboxFt: 0x170, SkyboxLf: 0x1a0, SkyboxOrientation: 0x250, SkyboxRt: 0x1d0, SkyboxUp: 0x200, StarCount: 0x260, SunAngularSize: 0x254, SunTextureId: 0x230 },
+  Sound: { Looped: 0x152, PlaybackSpeed: 0x130, RollOffMaxDistance: 0x134, RollOffMinDistance: 0x138, SoundGroup: 0x100, SoundId: 0xe0, Volume: 0x144 },
+  SpawnLocation: { AllowTeamChangeOnTouch: 0x45, Enabled: 0x1f9, ForcefieldDuration: 0x1f0, Neutral: 0x1fa, TeamColor: 0x1f4 },
+  SpecialMesh: { MeshId: 0x108, Scale: 0xdc },
+  StatsItem: { Value: 0xc8 },
+  SunRaysEffect: { Enabled: 0xc8, Intensity: 0xd0, Spread: 0xd4 },
+  TaskScheduler: { JobEnd: 0x1d8, JobName: 0x18, JobStart: 0x1d0, MaxFPS: 0x1b0, Pointer: 0x801d408 },
+  Team: { BrickColor: 0xd0 },
+  Terrain: { GrassLength: 0x1f8, MaterialColors: 0x280, WaterColor: 0x1e8, WaterReflectance: 0x200, WaterTransparency: 0x204, WaterWaveSize: 0x208, WaterWaveSpeed: 0x20c },
+  Textures: { Decal_Texture: 0x198, Texture_Texture: 0x198 },
+  Tool: { CanBeDropped: 0x4a0, Enabled: 0x3eb, Grip: 0x494, ManualActivationOnly: 0x4a2, RequiresHandle: 0x4a3, TextureId: 0x348, Tooltip: 0x450 },
+  VisualEngine: { Dimensions: 0xa70, FakeDataModel: 0xa50, Pointer: 0x7b1f068, RenderView: 0xb50, ViewMatrix: 0x140 },
+  Workspace: { CurrentCamera: 0x460, DistributedGameTime: 0x480, ReadOnlyGravity: 0x978, World: 0x3d8 },
+  World: { AirProperties: 0x1d8, FallenPartsDestroyHeight: 0x1c8, Gravity: 0x1d0, Primitives: 0x240, worldStepsPerSec: 0x660 }
+};
+
+const FILTER_GROUPS = {
+  all: null,
+  player: ['Player','Humanoid','AnimationTrack','Animator','PlayerMouse','PlayerConfigurer','CharacterMesh','Clothing'],
+  humanoid: ['Humanoid','AnimationTrack','Animator'],
+  rendering: ['RenderJob','RenderView','VisualEngine','BloomEffect','BlurEffect','DepthOfFieldEffect','SunRaysEffect','ColorCorrectionEffect','ColorGradingEffect','Atmosphere','Sky','Lighting'],
+  gui: ['GuiObject','GuiBase2D'],
+  pointers: null // handled specially
+};
+
+let activeFilter = 'all';
+let activeNs = null;
+let searchVal = '';
+
+const POINTER_KEYS = ['Pointer','RealDataModel','FakeDataModel'];
+
+function isPointerOffset(key, val) {
+  return POINTER_KEYS.some(k => key.includes(k)) || val > 0x1000000;
+}
+
+function hexStr(val) {
+  return '0x' + val.toString(16).toUpperCase().padStart(3,'0');
+}
+
+function getFiltered() {
+  const q = searchVal.toLowerCase();
+  let result = {};
+  for (const [ns, offsets] of Object.entries(RAW)) {
+    // namespace filter
+    if (activeNs && ns !== activeNs) continue;
+    // group filter
+    if (activeFilter !== 'all') {
+      if (activeFilter === 'pointers') {
+        // only show pointer offsets
+        const filtered = Object.fromEntries(Object.entries(offsets).filter(([k,v]) => isPointerOffset(k,v)));
+        if (Object.keys(filtered).length === 0) continue;
+        if (q) {
+          const ff = Object.fromEntries(Object.entries(filtered).filter(([k]) => k.toLowerCase().includes(q) || ns.toLowerCase().includes(q)));
+          if (Object.keys(ff).length === 0) continue;
+          result[ns] = ff;
+        } else {
+          result[ns] = filtered;
+        }
+        continue;
+      }
+      if (!FILTER_GROUPS[activeFilter].includes(ns)) continue;
+    }
+    if (q) {
+      const filtered = Object.fromEntries(Object.entries(offsets).filter(([k]) => k.toLowerCase().includes(q) || ns.toLowerCase().includes(q)));
+      if (Object.keys(filtered).length === 0) continue;
+      result[ns] = filtered;
+    } else {
+      result[ns] = offsets;
+    }
+  }
+  return result;
+}
+
+function totalOffsets(data) {
+  return Object.values(data).reduce((a,b) => a + Object.keys(b).length, 0);
+}
+
+function renderSidebar(data) {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.innerHTML = '';
+  const all = document.createElement('div');
+  all.className = 'ns-item' + (activeNs === null ? ' active' : '');
+  all.innerHTML = `<span class="ns-name">ALL</span><span class="ns-count">${totalOffsets(RAW)}</span>`;
+  all.onclick = () => { activeNs = null; render(); };
+  sidebar.appendChild(all);
+  for (const [ns, offsets] of Object.entries(RAW)) {
+    const item = document.createElement('div');
+    item.className = 'ns-item' + (activeNs === ns ? ' active' : '');
+    item.innerHTML = `<span class="ns-name">${ns}</span><span class="ns-count">${Object.keys(offsets).length}</span>`;
+    item.onclick = () => { activeNs = ns; render(); };
+    sidebar.appendChild(item);
+  }
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1600);
+}
+
+function copyOffset(ns, key, val) {
+  const text = `Offsets::${ns}::${key} = ${hexStr(val)}`;
+  navigator.clipboard.writeText(text).catch(() => {});
+  showToast(`copied ${ns}::${key}`);
+}
+
+function render() {
+  const data = getFiltered();
+  const content = document.getElementById('content');
+  const rc = document.getElementById('result-count');
+  const total = totalOffsets(data);
+  rc.innerHTML = `showing <span>${total}</span> offsets across <span>${Object.keys(data).length}</span> namespaces`;
+  document.getElementById('ns-count').textContent = Object.keys(RAW).length;
+  document.getElementById('visible-count').textContent = total;
+  renderSidebar(data);
+
+  if (total === 0) {
+    content.innerHTML = '<div class="empty">no offsets match your search</div>';
+    return;
+  }
+
+  content.innerHTML = '';
+  for (const [ns, offsets] of Object.entries(data)) {
+    const section = document.createElement('div');
+    section.className = 'ns-section';
+    const header = document.createElement('div');
+    header.className = 'ns-header';
+    header.innerHTML = `<span class="ns-header-name">${ns}</span><span class="ns-header-count">${Object.keys(offsets).length} offsets</span>`;
+    section.appendChild(header);
+    const grid = document.createElement('div');
+    grid.className = 'offsets-grid';
+    for (const [key, val] of Object.entries(offsets)) {
+      const row = document.createElement('div');
+      const isPtr = isPointerOffset(key, val);
+      row.className = 'offset-row' + (isPtr ? ' is-pointer' : '');
+      row.innerHTML = `<span class="offset-name">${key}</span><span class="offset-value">${hexStr(val)}</span><span class="copy-hint">click to copy</span>`;
+      row.onclick = () => {
+        copyOffset(ns, key, val);
+        row.classList.add('copied');
+        setTimeout(() => row.classList.remove('copied'), 600);
+      };
+      grid.appendChild(row);
+    }
+    section.appendChild(grid);
+    content.appendChild(section);
+  }
+}
+
+document.getElementById('search').addEventListener('input', e => {
+  searchVal = e.target.value;
+  render();
+});
+
+document.getElementById('filters').addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn');
+  if (!btn) return;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeFilter = btn.dataset.filter;
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
